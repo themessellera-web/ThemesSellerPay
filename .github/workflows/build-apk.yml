@@ -1,0 +1,38 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: unzip -q ThemesSellerPay-android-app.zip
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build release APK
+        working-directory: ThemesSellerPay
+        run: gradle --no-daemon assembleRelease
+
+      - name: Copy APK
+        run: cp ThemesSellerPay/app/build/outputs/apk/release/app-release.apk ThemesSellerPay.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ThemesSellerPay-APK
+          path: ThemesSellerPay.apk
